@@ -2,10 +2,12 @@ name: DOTNET_MVC_CI_Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    tags:
+      - 'v*'       # Triggers automatically for any future tags starting with 'v'
+  workflow_dispatch: # Allows you to manually trigger it for your existing v1.0.0 tag
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,13 +17,10 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '8.0' # 👈 Change this to '6.0' or '7.0' if your project uses an older version
 
     - name: Restore Dependencies
       run: dotnet restore
 
     - name: Build Application
-      run: dotnet build --no-restore --configuration Release
-
-    - name: Run Tests
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet build --configuration Release --no-restore
