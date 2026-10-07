@@ -1,21 +1,4 @@
-name: Container Package Pipeline
-
-on:
-  workflow_run:
-    workflows: ["DOTNET_MVC_CI_Pipeline"] # Triggers automatically when your build pipeline passes
-    types:
-      - completed
-
-jobs:
-  docker-pack:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest
-    
-    permissions:
-      contents: read
-      packages: write # Grant permission to publish packages
-
-    steps:
+steps:
     - name: Checkout Code
       uses: actions/checkout@v4
 
@@ -26,6 +9,12 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    # 1. This step converts your capitalized repository name to lowercase
+    - name: Downcase Repository Name
+      run: |
+        echo "REPO_LOWERCASE=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
+    # 2. This step uses that safe lowercase variable instead of the uppercase one
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v5
       with:
@@ -33,4 +22,4 @@ jobs:
         file: ./Dockerfile
         push: true
         tags: |
-          ghcr.io/${{ github.repository }}/mywebapp:latest
+          ghcr.io/${{ env.REPO_LOWERCASE }}/mywebapp:latest
