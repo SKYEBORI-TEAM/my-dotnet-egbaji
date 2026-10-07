@@ -1,0 +1,18 @@
+name: Container Package Pipeline
+
+on:
+  workflow_run:
+    workflows: ["DOTNET_MVC_CI_Pipeline"] # 👈 Listens to your original build name
+    types:
+      - completed # Only runs if the compilation succeeded
+
+jobs:
+  docker-pack:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
+      
+# ... (Your Docker login, build, and push to GitHub Packages commands go here) ...
